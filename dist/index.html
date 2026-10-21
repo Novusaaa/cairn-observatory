@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050508">
+  <meta name="description" content="Cairn — a live observatory for agent networks, research and execution.">
+  <title>Cairn — Agent Observatory</title>
+  <link rel="stylesheet" href="./runtime.css">
+  <link rel="stylesheet" href="./contrast.css">
+  <link rel="stylesheet" href="./kinetic.css">
+  <link rel="stylesheet" href="./event-panels.css">
+</head>
+<body>
+  <div class="observatory">
+    <header class="masthead">
+      <div class="brand-block"><div class="wordmark">Cairn</div><div class="brand-caption">AGENT RUNTIME / PAPER RESEARCH</div></div>
+      <div class="top-metrics" aria-label="Session metrics">
+        <div><span>PAPERS</span><strong id="top-papers">0<span class="metric-unit"> / 24</span></strong></div>
+        <div><span>AGENTS</span><strong id="top-agents">8<span class="metric-dot"></span></strong></div>
+        <div><span>NETWORK</span><strong id="top-network">0<span class="metric-unit"> NODES</span></strong></div>
+        <div><span>REQS</span><strong id="top-reqs">0<span class="metric-unit"> /s</span></strong></div>
+        <div><span>TOKENS</span><strong id="top-tokens">0<span class="metric-unit"> k</span></strong></div>
+      </div>
+    </header>
+
+    <div class="session-bar">
+      <div class="session-title"><span class="live-dot" id="live-dot"></span><span id="session-state">LIVE SESSION</span><span class="session-divider">/</span><span class="session-topic">Emergent coordination in multi-agent systems</span></div>
+      <div class="session-actions">
+        <span class="uptime" id="uptime">00:00:00</span>
+        <button class="source-button" id="source-button" aria-haspopup="dialog"><span class="source-dot"></span><span id="source-label">SIMULATION</span><span class="chevron">⌄</span></button>
+        <button class="control-button" id="pause-button" title="Pause session (Space)" aria-label="Pause session"><span id="pause-icon">Ⅱ</span><span id="pause-label">Pause</span></button>
+        <button class="icon-button" id="reset-button" title="Restart simulation (R)" aria-label="Restart simulation">↻</button>
+        <button class="icon-button fullscreen-button" id="fullscreen-button" title="Fullscreen (F)" aria-label="Enter fullscreen">⛶</button>
+      </div>
+    </div>
+
+    <main>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <section class="theater" aria-label="Agent network, rotating data annulus and live output field">
+        <canvas id="network-canvas" class="field-canvas" aria-label="Interactive agent network. Select an agent in the Agents panel to isolate traffic."></canvas>
+        <canvas id="stream-canvas" class="field-canvas" aria-label="Horizontal output bursts driven by live tool results"></canvas>
+        <svg id="horizon" role="img" aria-label="A giant side-facing rotating ring containing recent agent events"></svg>
+        <canvas id="energy-canvas" class="energy-canvas" aria-label="Event-driven spectral wavefronts"></canvas>
+        <div id="dispatch-queue" class="dispatch-queue" aria-label="Recent dispatched operations"></div>
+        <div class="field-label network-label">NETWORK / <span id="compass-agent-count">08 AGENTS</span></div>
+        <div class="field-label ring-label">EVENT BUS / <span id="compass-node-count">127</span> NODES</div>
+        <button class="trace-button" id="inspect-button">[ EVENT TRACE ↗ ]</button>
+        <div class="stream-readout"><span class="readout-title">TOOL OUTPUT / <span id="event-rate">0.0 EVT/S</span></span><strong id="latest-tool">—</strong><span id="latest-content">Waiting for tool output</span><div class="stream-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div id="node-tooltip" class="node-tooltip" hidden></div>
+        <button class="selection-chip" id="selection-chip" hidden><span id="selection-label"></span><span>×</span></button>
+        <div class="field-status"><span id="network-size">0 NODES · 0 EDGES</span><span id="event-count">0 EVENTS CAPTURED</span><span id="stream-speed">0 TOKENS / SEC</span></div>
+      </section>
+
+
+      <section class="panels" aria-label="Execution telemetry">
+        <article class="panel tasks-panel"><div class="panel-heading"><h2>TASKS</h2><span class="panel-index">FEED</span></div><div id="task-feed" class="task-feed"></div><div class="task-progress"><span id="task-percent">0%</span><span id="task-fraction">0 / 24 papers</span></div><div class="progress-track"><i id="task-progress"></i></div></article>
+        <article class="panel agents-panel"><div class="panel-heading"><h2>AGENTS</h2><span class="panel-count" id="active-agent-count">08</span></div><div id="agent-list" class="agent-list"></div><div class="panel-foot">SELECT AN AGENT TO ISOLATE</div></article>
+        <article class="panel code-panel"><div class="panel-heading"><h2>CODE</h2><span class="language-tag">PY</span></div><div class="file-label"><span>⌘</span> coordination.py</div><pre aria-label="Latest generated code"><code id="code-content"></code></pre><div class="panel-foot"><span class="small-dot purple"></span><span id="code-status">EXTRACTING PATTERNS</span></div></article>
+        <article class="panel metrics-panel"><div class="panel-heading"><h2>METRICS</h2><span class="panel-index">04</span></div><div class="metric-caption">LATENCY <strong><span id="latency-value">0</span><small>ms</small></strong></div><canvas id="latency-chart" class="sparkline" aria-label="Tool latency history"></canvas><div class="metric-caption throughput-caption">THROUGHPUT <strong><span id="throughput-value">0</span><small>evt/s</small></strong></div><canvas id="throughput-chart" class="sparkline" aria-label="Event throughput history"></canvas><div class="panel-foot" id="fps-label">60 FPS · REALTIME</div></article>
+        <article class="panel paper-panel"><div class="panel-heading"><h2>PAPER</h2><span class="panel-index">INDEX</span></div><div class="paper-name" id="paper-name">Waiting for research sources</div><div id="paper-list" class="paper-list"></div><div class="panel-foot"><span class="small-dot cyan"></span><span id="paper-status">INDEXING SOURCES</span></div></article>
+        <article class="panel errors-panel"><div class="panel-heading"><h2>ERRORS</h2><span class="panel-count" id="error-count">00</span></div><div id="error-list" class="error-list"></div><div class="panel-foot" id="errors-foot">RECOVERABLE · AUTO RETRY</div></article>
+        <article class="panel subtasks-panel"><div class="panel-heading"><h2>SUBTASKS</h2><span class="panel-count" id="subtask-count">00</span></div><div id="subtask-list" class="subtask-list"></div><div class="panel-foot"><span class="small-dot purple"></span> PARALLEL EXECUTION</div></article>
+        <article class="panel tokens-panel"><div class="panel-heading"><h2>TOKENS</h2><span class="panel-index">08</span></div><div class="token-total"><span id="token-total">0</span><small>k</small></div><div class="token-breakdown"><span><i class="cyan-bg"></i>INPUT <b id="input-tokens">0k</b></span><span><i class="purple-bg"></i>OUTPUT <b id="output-tokens">0k</b></span></div><canvas id="token-chart" class="token-chart" aria-label="Input and output token usage history"></canvas><button class="budget-button" id="budget-button" title="Change token budget"><span id="budget-label">0% OF 2M BUDGET</span><span>↗</span></button></article>
+      </section>
+    </main>
+    <footer><span class="footer-brand">CAIRN / RUNTIME 1.0</span><div class="legend"><span><i class="small-dot cyan"></i> RUNNING</span><span><i class="small-dot purple"></i> THINKING</span><span><i class="small-dot white"></i> IDLE</span><span><i class="small-dot amber"></i> ERROR</span></div><span id="clock">UTC 00:00:00</span><div class="keyboard-hint"><kbd>SPACE</kbd> PAUSE <span>·</span> <kbd>F</kbd> FULLSCREEN</div></footer>
+  </div>
+
+  <dialog id="connection-dialog" class="connection-dialog"><form id="connection-form"><div class="dialog-heading"><div><span class="eyebrow">EVENT TRANSPORT</span><h2>Connect a signal.</h2></div><button type="button" class="icon-button close-dialog" aria-label="Close connection dialog">×</button></div><p>Stream your agent events into Cairn, or explore the simulated research session.</p><label for="transport">SOURCE</label><select id="transport"><option value="simulation">Simulation</option><option value="sse">Server-Sent Events</option><option value="websocket">WebSocket</option></select><div id="endpoint-field" hidden><label for="endpoint">ENDPOINT URL</label><input id="endpoint" type="url" placeholder="http://localhost:8788/events" autocomplete="off"><p class="form-note">JSON events or arrays · up to 30 visual updates/sec · CORS required for SSE</p></div><div id="connection-error" class="form-error" role="alert" hidden></div><button type="submit" class="primary-button">Start observing <span>↗</span></button></form></dialog>
+
+  <dialog id="budget-dialog" class="connection-dialog"><form id="budget-form"><div class="dialog-heading"><div><span class="eyebrow">RESOURCE GUARDRAIL</span><h2>Token budget.</h2></div><button type="button" class="icon-button close-dialog" aria-label="Close budget dialog">×</button></div><p>A warning appears at 80%. At the limit, Cairn pauses local event ingestion. It does not stop your remote agents.</p><label for="budget-input">TOTAL SESSION TOKENS</label><input id="budget-input" type="number" min="1000" max="1000000000" step="1000" value="2000000" required><button type="submit" class="primary-button">Apply budget <span>↗</span></button></form></dialog>
+
+  <dialog id="event-dialog" class="event-dialog"><div class="dialog-heading"><div><span class="eyebrow">EVENT INSPECTOR</span><h2>The execution trace.</h2></div><button type="button" class="icon-button close-dialog" aria-label="Close event inspector">×</button></div><div class="inspector-controls"><input id="event-search" type="search" placeholder="Filter by agent, tool or content…" aria-label="Filter event log"><select id="event-type" aria-label="Filter event type"><option value="all">All events</option><option value="tool_call">Tool calls</option><option value="tool_result">Tool results</option><option value="message">Messages</option><option value="error">Errors</option><option value="subtask">Subtasks</option></select><button class="control-button" id="export-button">Export JSON ↓</button></div><div class="event-table-heading"><span>TIME / AGENT</span><span>EVENT / CONTENT</span><span>TOKENS</span></div><div id="virtual-log" class="virtual-log" tabindex="0" aria-label="Scrollable event log"><div id="virtual-spacer"></div><div id="virtual-rows"></div></div><div class="inspector-foot"><span id="filtered-count">0 EVENTS</span><span>LAST 2,000 EVENTS · VIRTUALIZED</span></div></dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

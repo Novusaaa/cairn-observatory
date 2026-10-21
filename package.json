@@ -1,0 +1,13 @@
+{
+  "name": "cairn-observatory",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "check": "node --check dist/app.js && node --check dist/engine.js && node --check dist/field.js && node --check dist/effects.js && node --check dist/gpu-stream.js && node --check dist/instruments.js",
+    "test": "node --test scripts/engine.test.mjs",
+    "demo:sse": "node scripts/demo-stream.mjs"
+  }
+}

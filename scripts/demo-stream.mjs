@@ -1,0 +1,6 @@
+import {createServer} from 'node:http';
+import {AGENTS} from '../dist/engine.js';
+let sequence=0;const clients=new Set();
+const server=createServer((req,res)=>{res.setHeader('Access-Control-Allow-Origin','*');if(req.url!=='/events'){res.writeHead(200,{'Content-Type':'text/plain'});res.end('Cairn SSE test endpoint: /events');return}res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache','Connection':'keep-alive'});res.write(': connected\n\n');clients.add(res);req.on('close',()=>clients.delete(res))});
+setInterval(()=>{if(!clients.size)return;const agent=AGENTS[sequence%AGENTS.length];const event={eventId:`sse-${Date.now()}-${++sequence}`,agentId:agent.id,agentName:agent.name,type:sequence%2?'tool_call':'tool_result',targetAgent:sequence%3?'':'orchestrator',tool:'arxiv.search',tokens:300+sequence%1200,latencyMs:60+sequence%200,status:sequence%2?'running':'success',content:sequence%2?'Searching live research sources':'Live tool response received through SSE',timestamp:new Date().toISOString()};for(const c of clients)c.write(`id: ${event.eventId}\ndata: ${JSON.stringify(event)}\n\n`)},150);
+server.listen(8788,'127.0.0.1',()=>console.log('Cairn demo SSE: http://localhost:8788/events'));
