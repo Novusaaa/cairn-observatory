@@ -10,13 +10,16 @@ export class GPUStream{
     const gl=canvas.getContext('webgl',{alpha:true,antialias:false,premultipliedAlpha:false,depth:false,stencil:false,powerPreference:'high-performance'});
     if(!gl){canvas.dataset.renderer='canvas';return new CanvasStream(canvas)}
     this.canvas=canvas;this.gl=gl;this.rays=[];this.seed=2871;this.width=0;this.height=0;this.dpr=Math.min(devicePixelRatio||1,1.25);this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;this.vertices=new Float32Array(4600*8*6);this.contextLost=false;
-    const vertex=this.shader(gl.VERTEX_SHADER,'attribute vec2 a_position; attribute vec4 a_color; uniform vec2 u_resolution; varying vec4 v_color; void main(){vec2 p=a_position/u_resolution*2.0-1.0;gl_Position=vec4(p.x,-p.y,0.0,1.0);v_color=a_color;}');
+    try{const vertex=this.shader(gl.VERTEX_SHADER,'attribute vec2 a_position; attribute vec4 a_color; uniform vec2 u_resolution; varying vec4 v_color; void main(){vec2 p=a_position/u_resolution*2.0-1.0;gl_Position=vec4(p.x,-p.y,0.0,1.0);v_color=a_color;}');
     const fragment=this.shader(gl.FRAGMENT_SHADER,'precision mediump float; varying vec4 v_color; void main(){gl_FragColor=v_color;}');
     const program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('Output shader could not link');gl.useProgram(program);gl.deleteShader(vertex);gl.deleteShader(fragment);this.program=program;
     this.buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);gl.bufferData(gl.ARRAY_BUFFER,this.vertices.byteLength,gl.DYNAMIC_DRAW);
     const pos=gl.getAttribLocation(program,'a_position'),color=gl.getAttribLocation(program,'a_color');gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(color);gl.vertexAttribPointer(color,4,gl.FLOAT,false,24,8);this.resolution=gl.getUniformLocation(program,'u_resolution');gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.disable(gl.DEPTH_TEST);canvas.dataset.renderer='webgl';this.resize();this.observer=new ResizeObserver(()=>this.resize());this.observer.observe(canvas);
-    canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();this.contextLost=true;canvas.dataset.renderer='recovering'});canvas.addEventListener('webglcontextrestored',()=>{const replacement=canvas.cloneNode();canvas.replaceWith(replacement);this.fallback=new CanvasStream(replacement);replacement.dataset.renderer='canvas';this.contextLost=false});
+    canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();this.contextLost=true;canvas.dataset.renderer='recovering'});canvas.addEventListener('webglcontextrestored',()=>this.useFallback());
+    }catch{this.useFallback()}
   }
+  useFallback(){this.observer?.disconnect();const replacement=this.canvas.cloneNode();this.canvas.replaceWith(replacement);this.fallback=new CanvasStream(replacement);replacement.dataset.renderer='canvas';this.contextLost=false;this.rays=[]}
+  reset(){this.rays=[];this.fallback?.reset()}
   shader(type,source){const gl=this.gl,s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error('Output shader could not compile');return s}
   resize(){const rect=this.canvas.getBoundingClientRect();this.width=rect.width;this.height=rect.height;this.canvas.width=Math.round(rect.width*this.dpr);this.canvas.height=Math.round(rect.height*this.dpr);this.gl.viewport(0,0,this.canvas.width,this.canvas.height)}
   rand(){this.seed=(Math.imul(this.seed,1664525)+1013904223)>>>0;return this.seed/4294967296}
