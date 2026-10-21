@@ -1,62 +1,133 @@
-# Cairn
+<div align="center">
 
-全屏智能体运行观测界面。左侧消息网络、贯穿上下边缘的侧向 SVG 事件环、WebGL 炫彩输出束。底部 4 个数据区通过页签切换 8 类信息。无框架、无构建依赖。
+<p><sub>AGENT RUNTIME / PAPER RESEARCH</sub></p>
+<h1>Cairn</h1>
+<p><strong>See your agents work.</strong></p>
+<p>把消息、工具调用与输出流，放在同一个运行现场。</p>
 
-## 本地运行
+<p>
+  <code>Vanilla JavaScript</code> &nbsp;·&nbsp;
+  <code>Canvas · SVG · WebGL</code> &nbsp;·&nbsp;
+  <code>WebSocket / SSE</code> &nbsp;·&nbsp;
+  <code>零运行依赖</code>
+</p>
 
-```powershell
-cd D:\CodexProjects\cairn
+<p>
+  <a href="#快速开始">快速开始</a> &nbsp; / &nbsp;
+  <a href="#四个视区八类信息">功能概览</a> &nbsp; / &nbsp;
+  <a href="docs/integration.md">接入 Agent</a> &nbsp; / &nbsp;
+  <a href="docs/architecture.md">实现与边界</a>
+</p>
+
+</div>
+
+![Cairn 运行全景：左侧 Agent 网络、中间旋转事件环、右侧输出流与底部四个数据视区](docs/assets/cairn-overview.jpg)
+
+<p align="center"><sub>内置模拟会话实景 · <a href="docs/assets/cairn-motion.gif">查看 3 秒动效预览（约 1.8 MB）</a> · <a href="docs/assets/cairn-overview.jpg">查看清晰大图</a></sub></p>
+
+## 一屏看清 Agent 运行
+
+Cairn 是一个全屏智能体运行观测界面。它接收事件，把 Agent 之间的交接、工具执行、Token 消耗与延迟映射成连续的可视化，适合多智能体研究、工作流调试和运行演示。
+
+- **协作关系**：Agent、工具和子任务组成消息网络，活跃流量沿连线移动。
+- **执行过程**：事件字段和载荷字节排入巨大的旋转弧环，左侧事件带向上滚动、渐隐。
+- **工具输出**：返回事件触发水平光束，信号以蓝、紫、粉、橙、金与白色流动。
+- **可追溯数据**：执行跨度、转交矩阵、代码返回和延迟轨迹由事件更新；日志可筛选、搜索、导出。
+
+背景、文字和刻度采用黑白高对比，动态信号保留颜色。四个底部视区贴合主场景，窄屏自动调整为两列或单列。
+
+## 快速开始
+
+需要本机有 **Node.js**。项目没有第三方运行依赖，无需安装依赖或构建。
+
+```bash
+git clone https://github.com/Novusaaa/cairn-observatory.git
+cd cairn-observatory
 npm start
 ```
 
-访问 http://127.0.0.1:4173。默认使用明确标记的模拟研究事件。Space 暂停，R 重启模拟，F 全屏。点击节点、AGENTS 条目或转交矩阵单元可筛选；EVENT TRACE 打开虚拟滚动日志，支持搜索、类型过滤和 JSON 导出。左侧事件带从底部进入，向上滚动，在顶部渐隐；暂停会冻结事件带和主场景。
+打开 **[http://127.0.0.1:4173](http://127.0.0.1:4173)**，即可看到模拟研究会话。
 
-底部默认视图：TASKS 展示最近 15 秒的工具执行跨度；AGENTS 展示最近 30 秒的 source→target 转交矩阵；CODE 展示工具实际返回，变化行短暂高亮；METRICS 用实际时间戳绘制事件延迟和每秒 Token。悬停任务条、矩阵或延迟点可查看数值。SUBTASKS、ERRORS、PAPER、TOKENS 通过页签切换。装饰性的粒子吸引子、体素及虚构曲面已移除。
+> 默认数据源明确标记为 `SIMULATION`。接入自己的 Agent 时，通过顶部数据源入口切换到 WebSocket 或 SSE。
 
-## 接入真实 Agent
+## 四个视区，八类信息
 
-点击顶部 SIMULATION，选择 WebSocket 或 SSE 并填写地址。每条消息发送一个 JSON 事件或事件数组；SSE 使用标准 `data: {...}\n\n` 的默认 message 事件。跨域 SSE 服务需配置 CORS。HTTPS 托管页使用 HTTPS/WSS 端点；本地 HTTP 预览可以连接本地 HTTP/WS。也可用 `window.cairn.connect('sse', url)` 或 `window.cairn.ingest(event)`。
+每个视区包含两个页签，保留信息密度，同时减少面板分割。
 
-```json
-{
-  "eventId": "evt-0001",
-  "agentId": "researcher-01",
-  "agentName": "Researcher 01",
-  "type": "tool_result",
-  "targetAgent": "analyst",
-  "tool": "arxiv.search",
-  "tokens": 1240,
-  "latencyMs": 180,
-  "status": "success",
-  "content": "12 papers returned · 4 relevant sources",
-  "timestamp": "2026-10-21T12:00:00.000Z"
-}
-```
+| 默认视图 | 看到什么 | 切换页签 |
+| :-- | :-- | :-- |
+| **TASKS** | 最近 15 秒的工具执行跨度，按 Agent 排列，可悬停查看耗时与 Token | `SUBTASKS`：委派任务及状态 |
+| **AGENTS** | Agent 状态与最近 30 秒的 source → target 转交矩阵 | `ERRORS`：错误及发生时间 |
+| **CODE** | 工具实际返回的文本或代码，变化行短暂高亮 | `PAPER`：论文与研究来源索引 |
+| **METRICS** | 按事件时间绘制延迟轨迹与每秒 Token 消耗 | `TOKENS`：会话累计用量、输入/输出分类及预算 |
 
-固定字段：eventId、agentId、agentName、type、targetAgent、tool、tokens、latencyMs、status、content、timestamp。eventId、agentId、type 必填；数字字段非负；timestamp 为 ISO 字符串或时间戳，默认当前时间。推荐 type：tool_call / tool_result / message / subtask / thinking / output / error / agent_start / agent_end / paper。status：running / thinking / idle / success / complete / error / pending。工具返回需使用 tool_result 或 output；论文索引事件使用 paper；子任务使用 subtask，通过 tool 字段提供稳定子任务标识。
+## 接入你的 Agent
 
-映射：agentId→节点；targetAgent→消息边和转交矩阵；tool→工具节点；subtask→子任务节点；tokens→边宽、粒子密度与 Token 柱；latencyMs→延迟轨迹；status→文字状态及原始事件；tool_result/output→水平射线。界面、文字、刻度使用黑白高对比，流动特效在蓝、紫、粉、橙、金、白中变化。
+先用随仓库提供的 SSE 测试服务验证链路。在另一个终端运行：
 
-```powershell
+```bash
 npm run demo:sse
 ```
 
-随后在本地页面选择 SSE，连接 `http://localhost:8788/events`，可验证独立服务器的真实推送链路。
+在页面顶部点击 **SIMULATION**，选择 **Server-Sent Events**，地址填写：
 
-## 资源边界
+```text
+http://localhost:8788/events
+```
 
-- 每秒最多 30 批视觉更新，批内按 agentId/targetAgent/type/tool/status 合并，累计 tokens 和事件数，保留最新内容。日志导出保留最近 2,000 条合并事件。
-- 最多 500 个节点，超出的节点按聚合集群展示；最多 2,500 条边、1,200 个待处理合并键、4,500 条射线、23 个冲击波；eventId 去重窗口 10,000 条。
-- 默认 2M Token 预算，80% 告警，100% 自动暂停本地消费；点击 TOKENS 预算文字修改。此功能不会停止远端 Agent。
-- 页面隐藏自动暂停本地观察，返回自动恢复。手动/预算暂停会关闭实时连接；暂停期间的数据不缓存、不重放。生产接入若需要无损恢复，请由服务端实现持久化和游标补发。
-- SSE 采用浏览器原生重连；WebSocket 断开在顶部提示，可通过数据源入口重连。原始 HTML 不会执行；输入文本按数据处理。
+这个服务发送测试事件。连接成功后，将地址换成你的 Agent 后端，并按统一事件结构推送 JSON；也可以直接连接 WebSocket。
 
-## 验证
+**[阅读接入指南 →](docs/integration.md)** — 事件字段、SSE 格式、浏览器 API、状态映射与暂停行为。
 
-`npm run check` 检查语法；`npm test` 验证固定 schema、去重与合并、30Hz 更新上限、500 节点聚合、内存上界及 Token 自动暂停。
+## 操作方式
 
-## 设计与实现
+| 操作 | 效果 |
+| :-- | :-- |
+| 点击网络节点、Agent 条目或转交矩阵单元 | 聚焦对应 Agent，筛选相关流量和事件环 |
+| 拖动网络节点 | 探索消息关系 |
+| 悬停任务条、矩阵单元或延迟点 | 查看事件数值 |
+| `EVENT TRACE` | 打开虚拟滚动日志，支持搜索、类型过滤和 JSON 导出 |
+| `Space` / `R` / `F` | 暂停或继续 / 重启模拟 / 全屏 |
+| 页签中的 `←` / `→` | 切换同组页签 |
+| `TOKENS` 下方的预算入口 | 调整本地会话的 Token 预算 |
 
-以用户提供的 1920×1080、约 16 秒视频为构图参考：左侧连线汇入侧向巨大圆环，文字块沿弧面转动，右侧高速平行输出，底部贴合主场景。背景 #050508、文字与刻度 #fff；流动信号随机炫彩。界面用 Segoe UI，数字用 Bahnschrift，原始代码与字节矩阵使用等宽字体；无远程字体依赖。底部默认 4 区、每区 2 个页签；≤800px 调整为 2 列，≤520px 改为单列，避免压缩文字。
+## 渲染与资源控制
 
-网络、执行跨度、路由矩阵和事件冲击波使用 Canvas，事件文字环使用 SVG；数千条射线使用小型 WebGL 着色器一次提交绘制，支持 Canvas 回退。GPU 输出替换了逐条创建渐变的实现，避免高密度输出卡顿。设备像素比上限 1.25；网络物理计算约 30Hz，300 节点以上约 15Hz；场景由 requestAnimationFrame 渲染。reduced-motion 停止环转动、射线与冲击波，事件数据照常更新。支持键盘焦点、原生模态框、页签方向键、纯文本事件检查器和图形文字说明。
+**Canvas** 绘制网络与数据图，**SVG** 承载旋转事件环，**WebGL** 批量绘制输出光束，并提供 Canvas 回退。界面使用系统字体，无远程字体依赖。
+
+<details>
+<summary><strong>展开查看性能边界与暂停机制</strong></summary>
+
+- 每秒最多 **30 批视觉更新**，高频事件按相同键合并，累计 Token 与事件数。
+- 最多 **500 个可视节点**，超出后聚合；保留最近 **2,000 条合并事件**，日志采用虚拟滚动。
+- 默认预算为 **2M Token**：达到 80% 提示，达到 100% 暂停本地接收。此操作不会停止远端 Agent。
+- 页面隐藏时自动暂停本地观察，返回后恢复；实时连接在暂停期间关闭，期间事件不缓存、不重放。
+- 尊重系统的 `prefers-reduced-motion` 设置，停止圆环转动、射线运动与冲击波。
+
+完整的缓冲上限、渲染策略和接入约束见 **[实现与边界](docs/architecture.md)**。
+
+</details>
+
+## 开发与贡献
+
+```bash
+npm run check   # JavaScript 语法检查
+npm test        # 事件协议、合并、更新频率、容量边界与预算测试
+```
+
+```text
+cairn-observatory/
+├── dist/                 页面、样式、事件引擎与渲染器
+├── scripts/              本地服务、SSE 测试源与事件引擎测试
+├── docs/
+│   ├── assets/           界面截图与轻量动效预览
+│   ├── integration.md    Agent 事件接入指南
+│   └── architecture.md   实现、容量与生命周期说明
+└── package.json          启动和验证命令
+```
+
+欢迎提交 [Issue](https://github.com/Novusaaa/cairn-observatory/issues) 或 [Pull Request](https://github.com/Novusaaa/cairn-observatory/pulls)。报告问题时，可附上浏览器、数据源类型和脱敏后的最小事件样例；改动视觉或交互时，附上截图更便于核对。
+
+---
+
+<p align="center"><sub>Cairn · 事件驱动的 Agent 运行观测</sub></p>
